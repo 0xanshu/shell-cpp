@@ -19,7 +19,7 @@ int main() {
     break;
   } else if (cmd.substr(0,4) == "type") {
     if(cmd.substr(5) == "echo" || "exit" || "type" ){
-      cout << cmd.substr(5) << " is a shell bulletin" << endl;
+      cout << cmd.substr(5) << " is a shell builtin" << endl;
     }
   } else if (cmd.substr(0,4) == "echo") {
     cout << cmd.substr(5) << endl;
