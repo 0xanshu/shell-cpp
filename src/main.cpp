@@ -7,19 +7,26 @@ int main() {
   cout << unitbuf;
   cerr << unitbuf;
 
-  bool exit = 1;
-  while(exit){
+  while(true){
   // TODO: Uncomment the code below to pass the first stage
   cout << "$ ";
 
   // Inputing users commands
   string cmd;
-  cin >> cmd;
-  
+  getline(cin, cmd);
+    
+  int pos = cmd.find(' ');
+  string mainCmd = cmd.substr(0, pos);
+  string restCmd = cmd.substr(pos + 1);
+
   if(cmd == "exit"){
-    exit = 0;
-    continue;
-  } 
-  cout << cmd << ": command not found" << endl;
+    break;
+  } else if (cmd == "echo"){
+    cout << "" << endl;
+  } else if (mainCmd == "echo") {
+    cout << restCmd << endl;
+  } else {
+    cout << cmd << ": command not found" << endl; 
+  }
   }
 }
