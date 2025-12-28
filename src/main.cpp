@@ -69,7 +69,7 @@ int main() {
         string select_path = diff_paths[i];
         if(doesItExist(select_path, comd)) {
           found = 1;
-          cout << comd << " is " << select_path << endl;
+          cout << comd << " is " << select_path << "/" << comd << endl;
         }
       }
       if(!found) {
