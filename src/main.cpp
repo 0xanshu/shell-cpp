@@ -36,7 +36,6 @@ int main() {
 
   const char* path_env = getenv("PATH");
   vector<string> diff_paths;
-  cout << path_env << endl;
   if(path_env){
     string path_str(path_env);
     stringstream ss(path_str);
