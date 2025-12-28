@@ -64,15 +64,17 @@ int main() {
     {
       cout << cmd.substr(5) << " is a shell builtin" << endl;
     } else if (true) {
+      int found = 0;
       for(int i = 0; i < diff_paths.size(); i++) {
         string select_path = diff_paths[i];
         if(doesItExist(select_path, comd)) {
+          found = 1;
           cout << comd << " is " << select_path << endl;
         }
       }
-    }
-    else {
-      cout << cmd.substr(5) << ": not found" << endl;
+      if(!found) {
+        cout << comd << ": not found" << endl; 
+      }
     }
   } else if (cmd.substr(0,4) == "echo") {
     cout << cmd.substr(5) << endl;
