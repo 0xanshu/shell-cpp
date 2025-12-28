@@ -14,17 +14,15 @@ int main() {
   // Inputing users commands
   string cmd;
   getline(cin, cmd);
-    
-  int pos = cmd.find(' ');
-  string mainCmd = cmd.substr(0, pos);
-  string restCmd = cmd.substr(pos + 1);
 
   if(cmd == "exit"){
     break;
-  } else if (cmd == "echo"){
-    cout << "" << endl;
-  } else if (mainCmd == "echo") {
-    cout << restCmd << endl;
+  } else if (cmd.substr(0,4) == "type") {
+    if(cmd.substr(5) == "echo" || "exit" || "type" ){
+      cout << cmd.substr(5) << " is a shell bulletin" << endl;
+    }
+  } else if (cmd.substr(0,4) == "echo") {
+    cout << cmd.substr(5) << endl;
   } else {
     cout << cmd << ": command not found" << endl; 
   }
