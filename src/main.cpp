@@ -18,8 +18,10 @@ int main() {
   if(cmd == "exit"){
     break;
   } else if (cmd.substr(0,4) == "type") {
-    if(cmd.substr(5) == "echo" || "exit" || "type" ){
+    if(cmd.substr(5) == "echo" || cmd.substr(5) == "exit" || cmd.substr(5) == "type" ){
       cout << cmd.substr(5) << " is a shell builtin" << endl;
+    } else {
+      cout << cmd.substr(5) << ": not found" << endl;
     }
   } else if (cmd.substr(0,4) == "echo") {
     cout << cmd.substr(5) << endl;
