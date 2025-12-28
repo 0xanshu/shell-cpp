@@ -14,5 +14,5 @@ int main() {
   string cmd;
   cin >> cmd;
 
-  cout << cmd << "invalid command" << endl;
+  cout << cmd << ": command not found" << endl;
 }
