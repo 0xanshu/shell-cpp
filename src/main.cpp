@@ -9,4 +9,10 @@ int main() {
 
   // TODO: Uncomment the code below to pass the first stage
   cout << "$ ";
+
+  // Inputing users commands
+  string cmd;
+  cin >> cmd;
+
+  cout << cmd << "invalid command" << endl;
 }
