@@ -70,6 +70,7 @@ int main() {
         if(doesItExist(select_path, comd)) {
           found = 1;
           cout << comd << " is " << select_path << "/" << comd << endl;
+          break;
         }
       }
       if(!found) {
