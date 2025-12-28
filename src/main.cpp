@@ -15,7 +15,11 @@ int main() {
   // Inputing users commands
   string cmd;
   cin >> cmd;
-
+  
+  if(cmd == "exit"){
+    exit = 0;
+    continue;
+  } 
   cout << cmd << ": command not found" << endl;
   }
 }
