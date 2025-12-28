@@ -7,6 +7,8 @@ int main() {
   cout << unitbuf;
   cerr << unitbuf;
 
+  bool exit = 1;
+  while(exit){
   // TODO: Uncomment the code below to pass the first stage
   cout << "$ ";
 
@@ -15,4 +17,5 @@ int main() {
   cin >> cmd;
 
   cout << cmd << ": command not found" << endl;
+  }
 }
