@@ -76,6 +76,32 @@ int main()
       string path_pwd = fs::current_path();
       cout << path_pwd.substr(0, -1) << endl;
     }
+    else if (cmd.substr(0, 2) == "cd")
+    {
+      if (cmd.substr(3, 1) == "/")
+      {
+        string p = cmd.substr(3);
+        fs::current_path(p);
+      }
+      else
+      {
+        int found = 0;
+        for (const auto &entry : fs::directory_iterator(fs::current_path()))
+        {
+          if (entry.path().filename() == cmd.substr(3))
+          {
+            string p = string(fs::current_path()) + "/" + cmd.substr(3);
+            fs::current_path(p);
+            found = 1;
+            break;
+          }
+        }
+        if (!found)
+        {
+          cout << "cd: /" << cmd.substr(3) << ": No such file or directory" << endl;
+        }
+      }
+    }
     else if (cmd.substr(0, 4) == "type")
     {
       string comd = cmd.substr(5);
@@ -83,6 +109,7 @@ int main()
           comd == "exit" ||
           comd == "type" ||
           comd == "pwd" ||
+          comd == "cd" ||
           comd == "PATH")
       {
         cout << cmd.substr(5) << " is a shell builtin" << endl;
