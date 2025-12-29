@@ -80,8 +80,15 @@ int main()
     {
       if (cmd.substr(3, 1) == "/")
       {
-        string p = cmd.substr(3);
-        fs::current_path(p);
+        try
+        {
+          string p = cmd.substr(3);
+          fs::current_path(p);
+        }
+        catch (const fs::filesystem_error &e)
+        {
+          cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
+        }
       }
       else
       {
