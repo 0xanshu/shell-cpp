@@ -66,49 +66,100 @@ int main()
     string cmd;
     getline(cin, cmd);
     int pos = cmd.find(" ");
+    string cmnd = cmd.substr(pos + 1);
 
+    // Exit command
     if (cmd == "exit")
     {
       break;
     }
+
+    // pwd command
     else if (cmd.substr(0, 3) == "pwd")
     {
       string path_pwd = fs::current_path();
       cout << path_pwd.substr(0, -1) << endl;
     }
+
+    // cd command
     else if (cmd.substr(0, 2) == "cd")
     {
       if (cmd.substr(3, 1) == "/")
       {
-        try
+        if (fs::is_directory(cmd.substr(3)))
         {
           string p = cmd.substr(3);
           fs::current_path(p);
         }
-        catch (const fs::filesystem_error &e)
+        else
         {
           cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
         }
       }
+      else if (cmd.substr(3, 1) == "~")
+      {
+        fs::current_path("/");
+      }
+      else if (cmd.substr(3, 3) == "../")
+      {
+        int lvl_to_go_down = 0;
+        int pos = 0;
+        while ((pos = (cmd.substr(3)).find("../", pos)) != string::npos)
+        {
+          lvl_to_go_down++;
+          pos += 3;
+        }
+        string sub = cmd.substr(3);
+        if (sub.size() >= 2 && sub.substr(sub.size() - 2) == "..")
+        {
+          lvl_to_go_down++;
+          pos += 2;
+        }
+        string path_pwd = fs::current_path();
+        string new_pwd = path_pwd;
+        for (int i = 0; i < lvl_to_go_down; i++)
+        {
+          int pos = new_pwd.find_last_of('/');
+          if (pos != string::npos)
+            new_pwd = new_pwd.substr(0, pos);
+        }
+        fs::current_path(new_pwd);
+      }
+      else if (cmd.substr(3, 2) == "..")
+      {
+        string path_pwd = fs::current_path();
+        int pos = path_pwd.find_last_of('/');
+        string new_pwd = path_pwd.substr(0, pos);
+        fs::current_path(new_pwd);
+      }
       else
       {
-        int found = 0;
-        for (const auto &entry : fs::directory_iterator(fs::current_path()))
+        if (fs::is_directory(cmd.substr(3)))
         {
-          if (entry.path().filename() == cmd.substr(3))
+          int found = 0;
+          for (const auto &entry : fs::directory_iterator(fs::current_path()))
           {
-            string p = string(fs::current_path()) + "/" + cmd.substr(3);
-            fs::current_path(p);
-            found = 1;
-            break;
+            if (entry.path().filename() == cmd.substr(3))
+            {
+              string p = string(fs::current_path()) + "/" + cmd.substr(3);
+              fs::current_path(p);
+              found = 1;
+              break;
+            }
+          }
+          if (!found)
+          {
+            cout << "cd: /" << cmd.substr(3) << ": No such file or directory" << endl;
           }
         }
-        if (!found)
+        else
         {
-          cout << "cd: /" << cmd.substr(3) << ": No such file or directory" << endl;
+          cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
         }
       }
     }
+
+    // type command
     else if (cmd.substr(0, 4) == "type")
     {
       string comd = cmd.substr(5);
@@ -134,6 +185,8 @@ int main()
         }
       }
     }
+
+    // if a executable exists or not
     else if (doesItExist(cmd.substr(0, pos)) != " ")
     {
       int ret = system(cmd.c_str());
@@ -142,10 +195,14 @@ int main()
         cout << cmd << ": failed to execute" << endl;
       }
     }
+
+    // echo command
     else if (cmd.substr(0, 4) == "echo")
     {
       cout << cmd.substr(5) << endl;
     }
+
+    // command is not found
     else
     {
       cout << cmd << ": command not found" << endl;
