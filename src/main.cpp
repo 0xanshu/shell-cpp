@@ -138,28 +138,7 @@ int main()
       }
       else
       {
-        // if (fs::is_directory(cmd.substr(3)))
-        // {
-        //   int found = 0;
-        //   for (const auto &entry : fs::directory_iterator(fs::current_path()))
-        //   {
-        //     if (entry.path().filename() == cmd.substr(3))
-        //     {
-        //       string p = string(fs::current_path()) + "/" + cmd.substr(3);
-        //       fs::current_path(p);
-        //       found = 1;
-        //       break;
-        //     }
-        //   }
-        //   if (!found)
-        //   {
-        //     cout << "cd: /" << cmd.substr(3) << ": No such file or directory" << endl;
-        //   }
-        // }
-        // else
-        // {
         cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
-        // }
       }
     }
 
