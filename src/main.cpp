@@ -82,6 +82,7 @@ int main()
       if (comd == "echo" ||
           comd == "exit" ||
           comd == "type" ||
+          comd == "pwd" ||
           comd == "PATH")
       {
         cout << cmd.substr(5) << " is a shell builtin" << endl;
