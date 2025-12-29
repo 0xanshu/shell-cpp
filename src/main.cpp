@@ -84,21 +84,27 @@ int main()
     // cd command
     else if (cmd.substr(0, 2) == "cd")
     {
-      if (cmd.substr(3, 1) == "/")
+      if (fs::is_directory(cmd.substr(3)))
       {
-        if (fs::is_directory(cmd.substr(3)))
-        {
-          string p = cmd.substr(3);
-          fs::current_path(p);
-        }
-        else
-        {
-          cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
-        }
+        string p = cmd.substr(3);
+        fs::current_path(p);
+      }
+      else if (!fs::is_directory(cmd.substr(3)))
+      {
+        cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
       }
       else if (cmd.substr(3, 1) == "~")
       {
         fs::current_path("/");
+      }
+      else if (cmd.substr(3, 2) == "./")
+      {
+        string path_pwd = fs::current_path();
+        int pos = path_pwd.find_last_of('/');
+        string new_pwd = path_pwd.substr(0, pos);
+        string lat_pwd = new_pwd + "/" + cmd.substr(5);
+        cout << lat_pwd << endl;
+        fs::current_path(lat_pwd);
       }
       else if (cmd.substr(3, 3) == "../")
       {
