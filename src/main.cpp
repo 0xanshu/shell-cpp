@@ -8,8 +8,6 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-// const char* path_env ="/usr/bin:/usr/local/bin";
-
 bool is_executable(const std::string &path)
 {
   struct stat st;
@@ -54,18 +52,6 @@ string doesItExist(string comd)
   return " ";
 }
 
-// vector<string> splitLines(const string &input)
-// {
-//   vector<string> result;
-//   istringstream iss(input);
-//   string word;
-//   while (iss >> word)
-//   {
-//     result.push_back(word);
-//   }
-//   return result;
-// }
-
 int main()
 {
   // Flush after every cout / std:cerr
@@ -77,7 +63,6 @@ int main()
     // TODO: Uncomment the code below to pass the first stage
     cout << "$ ";
 
-    // Inputing users commands
     string cmd;
     getline(cin, cmd);
     int pos = cmd.find(" ");
@@ -85,6 +70,11 @@ int main()
     if (cmd == "exit")
     {
       break;
+    }
+    else if (cmd.substr(0, 3) == "pwd")
+    {
+      string path_pwd = fs::current_path();
+      cout << path_pwd.substr(0, -1) << endl;
     }
     else if (cmd.substr(0, 4) == "type")
     {
@@ -111,19 +101,6 @@ int main()
     }
     else if (doesItExist(cmd.substr(0, pos)) != " ")
     {
-      // vector<string> cmdWords = splitLines(cmd);
-      // cout << "Program was passed " << cmdWords.size() << " args (including program name)." << endl;
-      // for (int i = 0; i < cmdWords.size(); i++)
-      // {
-      //   if (i == 0)
-      //   {
-      //     cout << "Arg #" << i << " (program name): " << cmdWords[0] << endl;
-      //   }
-      //   else
-      //   {
-      //     cout << "Arg #" << i << ": " << cmdWords[i] << endl;
-      //   }
-      // }
       int ret = system(cmd.c_str());
       if (ret == -1)
       {
