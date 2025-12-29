@@ -108,58 +108,79 @@ int main()
       }
       else if (cmd.substr(3, 3) == "../")
       {
+        int lvl_to_go_down = 0;
+        int pos = 0;
+        while ((pos = (cmd.substr(3)).find("../", pos)) != string::npos)
         {
-          string arg = cmd.substr(3);
-          // Trim leading/trailing spaces
-          size_t start = arg.find_first_not_of(" \t");
-          size_t end = arg.find_last_not_of(" \t");
-          if (start != string::npos && end != string::npos)
-            arg = arg.substr(start, end - start + 1);
-          else
-            arg = "";
-
-          if (arg.empty())
+          lvl_to_go_down++;
+          pos += 3;
+        }
+        string sub = cmd.substr(3);
+        if (sub.size() >= 2 && sub.substr(sub.size() - 2) == "..")
+        {
+          lvl_to_go_down++;
+          pos += 2;
+        }
+        string path_pwd = fs::current_path();
+        string new_pwd = path_pwd;
+        for (int i = 0; i < lvl_to_go_down; i++)
+        {
+          int pos = new_pwd.find_last_of('/');
+          if (pos != string::npos)
+            new_pwd = new_pwd.substr(0, pos);
+        }
+        fs::current_path(new_pwd);
+      }
+      else if (cmd.substr(3, 2) == "..")
+      {
+        string path_pwd = fs::current_path();
+        int pos = path_pwd.find_last_of('/');
+        string new_pwd = path_pwd.substr(0, pos);
+        fs::current_path(new_pwd);
+      }
+      else
+      {
+        if (fs::is_directory(cmd.substr(3)))
+        {
+          int found = 0;
+          for (const auto &entry : fs::directory_iterator(fs::current_path()))
           {
-            // No argument, go to HOME
-            const char *home = getenv("HOME");
-            if (home && fs::is_directory(home))
+            if (entry.path().filename() == cmd.substr(3))
             {
-              fs::current_path(home);
-            }
-            else
-            {
-              cout << "cd: HOME not set" << endl;
+              string p = string(fs::current_path()) + "/" + cmd.substr(3);
+              fs::current_path(p);
+              found = 1;
+              break;
             }
           }
-          else if (arg == "~")
+          if (!found)
           {
-            const char *home = getenv("HOME");
-            if (home && fs::is_directory(home))
-            {
-              fs::current_path(home);
-            }
-            else
-            {
-              cout << "cd: HOME not set" << endl;
-            }
-          }
-          else if (arg.size() >= 2 && arg.substr(arg.size() - 2) == "..")
-          {
-            // If last part is "..", go up one directory
-            string path_pwd = fs::current_path();
-            int pos = path_pwd.find_last_of('/');
-            string new_pwd = path_pwd.substr(0, pos);
-            fs::current_path(new_pwd);
-          }
-          else if (fs::is_directory(arg))
-          {
-            fs::current_path(arg);
-          }
-          else
-          {
-            cout << "cd: " << arg << ": No such file or directory" << endl;
+            cout << "cd: /" << cmd.substr(3) << ": No such file or directory" << endl;
           }
         }
+        else
+        {
+          cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
+        }
+      }
+    }
+
+    // type command
+    else if (cmd.substr(0, 4) == "type")
+    {
+      string comd = cmd.substr(5);
+      if (comd == "echo" ||
+          comd == "exit" ||
+          comd == "type" ||
+          comd == "pwd" ||
+          comd == "cd" ||
+          comd == "PATH")
+      {
+        cout << cmd.substr(5) << " is a shell builtin" << endl;
+      }
+      else
+      {
+        string res = doesItExist(comd);
         if (res != " ")
         {
           cout << comd << " is " << res << "/" << comd << endl;
