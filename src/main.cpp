@@ -93,9 +93,11 @@ int main()
       {
         cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
       }
-      else if (cmd.substr(3, 1) == "~")
+      else if (cmd.substr(4) == "~")
       {
-        fs::current_path("/");
+        const char *home_dir_c = getenv("HOME");
+        string home_dir(home_dir_c);
+        fs::current_path(home_dir);
       }
       else if (cmd.substr(3, 2) == "./")
       {
