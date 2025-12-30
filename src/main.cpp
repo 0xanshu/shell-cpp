@@ -169,6 +169,37 @@ int main()
       }
     }
 
+    else if (cmd.size() > 0 && (cmd[0] == '"' || cmd[0] == '\''))
+    {
+      char quote = cmd[0];
+      size_t end_quote = cmd.find(quote, 1);
+      if (end_quote != string::npos)
+      {
+        string exe_name = cmd.substr(1, end_quote - 1);
+        string rest = cmd.substr(end_quote + 1);
+        size_t arg_start = rest.find_first_not_of(" \t");
+        if (arg_start != string::npos)
+          rest = rest.substr(arg_start);
+        else
+          rest = "";
+
+        string full_cmd = "\"" + exe_name + "\"";
+        if (!rest.empty())
+          full_cmd += " " + rest;
+
+        int ret = system(full_cmd.c_str());
+        if (ret == -1)
+        {
+          cout << exe_name << ": failed to execute" << endl;
+        }
+      }
+      else
+      {
+        cout << "Unmatched quote in command!" << endl;
+        continue;
+      }
+    }
+
     // if a executable exists or not
     else if (doesItExist(cmd.substr(0, pos)) != " ")
     {
