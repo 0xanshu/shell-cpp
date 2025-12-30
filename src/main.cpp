@@ -187,7 +187,7 @@ int main()
         string exe_path = doesItExist(exe_name);
         if (exe_path != " ")
         {
-          string full_cmd = "\"" + exe_path + "/" + exe_name + "\"";
+          string full_cmd = "\"" + exe_name + "\"";
           if (!rest.empty())
             full_cmd += " " + rest;
 
