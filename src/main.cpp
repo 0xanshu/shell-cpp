@@ -176,6 +176,8 @@ int main()
       if (end_quote != string::npos)
       {
         string exe_name = cmd.substr(1, end_quote - 1);
+        exe_name.erase(remove(exe_name.begin(), exe_name.end(), '\''), exe_name.end());
+        exe_name.erase(remove(exe_name.begin(), exe_name.end(), '"'), exe_name.end());
         string rest = cmd.substr(end_quote + 1);
         size_t arg_start = rest.find_first_not_of(" \t");
         if (arg_start != string::npos)
