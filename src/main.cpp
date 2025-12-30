@@ -188,22 +188,27 @@ int main()
         else
           rest = "";
 
-        string exe_path = doesItExist(exe_name);
-        if (exe_path != " ")
-        {
-          string full_cmd = "\"" + exe_name + "\"";
-          if (!rest.empty())
-            full_cmd += " " + rest;
+        string full_cmd = "\"" + exe_name + "\"";
+        if (!rest.empty())
+          full_cmd += " " + rest;
 
-          int ret = system(full_cmd.c_str());
-          if (ret == -1)
-          {
-            cout << exe_name << ": failed to execute" << endl;
-          }
-        }
-        else
+        int ret = system(full_cmd.c_str());
+        if (ret == -1)
         {
-          cout << exe_name << ": not found" << endl;
+          string exe_path = doesItExist(exe_name);
+          if (exe_path != " ")
+          {
+            full_cmd = "\"" + exe_path + "/" + exe_name + "\"";
+            if (!rest.empty())
+              full_cmd += " " + rest;
+            ret = system(full_cmd.c_str());
+            if (ret == -1)
+              cout << exe_name << ": failed to execute" << endl;
+          }
+          else
+          {
+            cout << exe_name << ": not found" << endl;
+          }
         }
       }
       else
