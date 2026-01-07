@@ -19,6 +19,20 @@ bool is_executable(const std::string &path)
   return false;
 }
 
+string escape_for_shell(const string &str)
+{
+  string escaped;
+  for (char c : str)
+  {
+    if (c == '"' || c == '\\' || c == '$' || c == '`')
+    {
+      escaped += '\\';
+    }
+    escaped += c;
+  }
+  return escaped;
+}
+
 string doesItExist(string comd)
 {
   const char *path_env = getenv("PATH");
@@ -204,10 +218,12 @@ int main()
 
     else if (cmd.find(' ') != string::npos || cmd.find('"') != string::npos)
     {
-      string full_cmd = "\"" + cmd + "\"";
+      string escaped_cmd = escape_for_shell(cmd);
+      string full_cmd = "\"" + escaped_cmd + "\"";
       for (const auto &arg : args)
       {
-        full_cmd += " \"" + arg + "\"";
+        string escaped_arg = escape_for_shell(arg);
+        full_cmd += " \"" + escaped_arg + "\"";
       }
       int ret = system(full_cmd.c_str());
       if (ret == -1)
