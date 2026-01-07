@@ -92,7 +92,6 @@ int main()
     vector<string> tokens = tokenize(line);
     if (tokens.empty())
       continue;
-
     string cmd = tokens[0];
     vector<string> args(tokens.begin() + 1, tokens.end());
 
@@ -203,51 +202,17 @@ int main()
       }
     }
 
-    else if (cmd.size() > 0 && (cmd[0] == '"' || cmd[0] == '\''))
+    else if (cmd.find(' ') != string::npos || cmd.find('"') != string::npos)
     {
-      char quote = cmd[0];
-      size_t end_quote = cmd.find(quote, 1);
-      if (end_quote != string::npos)
+      string full_cmd = "\"" + cmd + "\"";
+      for (const auto &arg : args)
       {
-        string exe_name = cmd.substr(1, end_quote - 1);
-
-        exe_name.erase(remove(exe_name.begin(), exe_name.end(), '\''), exe_name.end());
-        exe_name.erase(remove(exe_name.begin(), exe_name.end(), '"'), exe_name.end());
-
-        string rest = cmd.substr(end_quote + 1);
-        size_t arg_start = rest.find_first_not_of(" \t");
-        if (arg_start != string::npos)
-          rest = rest.substr(arg_start);
-        else
-          rest = "";
-
-        string full_cmd = "\"" + exe_name + "\"";
-        if (!rest.empty())
-          full_cmd += " " + rest;
-
-        int ret = system(full_cmd.c_str());
-        if (ret == -1)
-        {
-          string exe_path = doesItExist(exe_name);
-          if (exe_path != " ")
-          {
-            full_cmd = "\"" + exe_path + "/" + exe_name + "\"";
-            if (!rest.empty())
-              full_cmd += " " + rest;
-            ret = system(full_cmd.c_str());
-            if (ret == -1)
-              cout << exe_name << ": failed to execute" << endl;
-          }
-          else
-          {
-            cout << exe_name << ": not found" << endl;
-          }
-        }
+        full_cmd += " \"" + arg + "\"";
       }
-      else
+      int ret = system(full_cmd.c_str());
+      if (ret == -1)
       {
-        cout << "Unmatched quote in command!" << endl;
-        continue;
+        cout << cmd << ": failed to execute" << endl;
       }
     }
 
