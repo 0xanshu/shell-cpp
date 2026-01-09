@@ -19,20 +19,6 @@ bool is_executable(const std::string &path)
   return false;
 }
 
-string escape_for_shell(const string &str)
-{
-  string escaped;
-  for (char c : str)
-  {
-    if (c == '"' || c == '\\' || c == '$' || c == '`')
-    {
-      escaped += '\\';
-    }
-    escaped += c;
-  }
-  return escaped;
-}
-
 string doesItExist(string comd)
 {
   const char *path_env = getenv("PATH");
@@ -67,29 +53,6 @@ string doesItExist(string comd)
   return " ";
 }
 
-vector<string> tokenize(const string &input)
-{
-  vector<string> tokens;
-  istringstream iss(input);
-  string token;
-  char c;
-  while (iss >> ws)
-  {
-    if (iss.peek() == '"' || iss.peek() == '\'')
-    {
-      char quote = iss.get();
-      getline(iss, token, quote);
-      tokens.push_back(token);
-    }
-    else
-    {
-      iss >> token;
-      tokens.push_back(token);
-    }
-  }
-  return tokens;
-}
-
 int main()
 {
   // Flush after every cout / std:cerr
@@ -101,14 +64,8 @@ int main()
     // TODO: Uncomment the code below to pass the first stage
     cout << "$ ";
 
-    string line;
-    getline(cin, line);
-    vector<string> tokens = tokenize(line);
-    if (tokens.empty())
-      continue;
-    string cmd = tokens[0];
-    vector<string> args(tokens.begin() + 1, tokens.end());
-
+    string cmd;
+    getline(cin, cmd);
     int pos = cmd.find(" ");
     string cmnd = cmd.substr(pos + 1);
 
@@ -119,25 +76,25 @@ int main()
     }
 
     // pwd command
-    else if (cmd == "pwd")
+    else if (cmd.substr(0, 3) == "pwd")
     {
       string path_pwd = fs::current_path();
       cout << path_pwd.substr(0, -1) << endl;
     }
 
     // cd command
-    else if (cmd == "cd")
+    else if (cmd.substr(0, 2) == "cd")
     {
-      if (args.empty() || args[0] == "~")
+      if (fs::is_directory(cmd.substr(3)))
+      {
+        string p = cmd.substr(3);
+        fs::current_path(p);
+      }
+      else if (cmd.substr(3) == "~")
       {
         const char *home_dir_c = getenv("HOME");
         string home_dir(home_dir_c);
         fs::current_path(home_dir);
-      }
-      else if (fs::is_directory(args[0]))
-      {
-        string p = args[0];
-        fs::current_path(p);
       }
       else if (cmd.substr(3, 2) == "./")
       {
@@ -152,12 +109,12 @@ int main()
       {
         int lvl_to_go_down = 0;
         int pos = 0;
-        while ((pos = (args[0]).find("../", pos)) != string::npos)
+        while ((pos = (cmd.substr(3)).find("../", pos)) != string::npos)
         {
           lvl_to_go_down++;
           pos += 3;
         }
-        string sub = args[0];
+        string sub = cmd.substr(3);
         if (sub.size() >= 2 && sub.substr(sub.size() - 2) == "..")
         {
           lvl_to_go_down++;
@@ -182,53 +139,96 @@ int main()
       }
       else
       {
-        cout << "cd: " << args[0] << ": No such file or directory" << endl;
+        cout << "cd: " << cmd.substr(3) << ": No such file or directory" << endl;
       }
     }
 
     // type command
-    else if (cmd == "type")
+    else if (cmd.substr(0, 4) == "type")
     {
-      if (args.empty())
+      string comd = cmd.substr(5);
+      if (comd == "echo" ||
+          comd == "exit" ||
+          comd == "type" ||
+          comd == "pwd" ||
+          comd == "cd" ||
+          comd == "PATH")
       {
-        cout << endl;
-      }
-      else if (args[0] == "echo" ||
-               args[0] == "exit" ||
-               args[0] == "pwd" ||
-               args[0] == "type" ||
-               args[0] == "cd" ||
-               args[0] == "PATH")
-      {
-        cout << args[0] << " is a shell builtin" << endl;
+        cout << cmd.substr(5) << " is a shell builtin" << endl;
       }
       else
       {
-        string res = doesItExist(args[0]);
+        string res = doesItExist(comd);
         if (res != " ")
         {
-          cout << args[0] << " is " << res << "/" << args[0] << endl;
+          cout << comd << " is " << res << "/" << comd << endl;
         }
         else
         {
-          cout << args[0] << ": not found" << endl;
+          cout << comd << ": not found" << endl;
         }
       }
     }
 
-    else if (cmd.find(' ') != string::npos || cmd.find('"') != string::npos)
+    else if (cmd.size() > 0 && (cmd[0] == '"' || cmd[0] == '\''))
     {
-      string escaped_cmd = escape_for_shell(cmd);
-      string full_cmd = "\"" + escaped_cmd + "\"";
-      for (const auto &arg : args)
+      char quote = cmd[0];
+      size_t end_quote = cmd.find(quote, 1);
+      if (end_quote != string::npos)
       {
-        string escaped_arg = escape_for_shell(arg);
-        full_cmd += " \"" + escaped_arg + "\"";
+        // Extract the executable name (preserving embedded quotes)
+        string exe_name = cmd.substr(1, end_quote - 1);
+
+        // Get the rest of the command (arguments)
+        string rest = cmd.substr(end_quote + 1);
+        size_t arg_start = rest.find_first_not_of(" \t");
+        if (arg_start != string::npos)
+          rest = rest.substr(arg_start);
+        else
+          rest = "";
+
+        // Helper function to escape a string for system() call
+        auto escapeForSystem = [](const string& str) -> string {
+          string escaped = "\"";
+          for (char c : str) {
+            if (c == '"' || c == '\\') {
+              escaped += '\\';
+            }
+            escaped += c;
+          }
+          escaped += "\"";
+          return escaped;
+        };
+
+        // Build the command with properly escaped executable name
+        string full_cmd = escapeForSystem(exe_name);
+        if (!rest.empty())
+          full_cmd += " " + rest;
+
+        int ret = system(full_cmd.c_str());
+        if (ret == -1)
+        {
+          string exe_path = doesItExist(exe_name);
+          if (exe_path != " ")
+          {
+            // Try with the full path, also properly escaped
+            full_cmd = escapeForSystem(exe_path + "/" + exe_name);
+            if (!rest.empty())
+              full_cmd += " " + rest;
+            ret = system(full_cmd.c_str());
+            if (ret == -1)
+              cout << exe_name << ": failed to execute" << endl;
+          }
+          else
+          {
+            cout << exe_name << ": not found" << endl;
+          }
+        }
       }
-      int ret = system(full_cmd.c_str());
-      if (ret == -1)
+      else
       {
-        cout << cmd << ": failed to execute" << endl;
+        cout << "Unmatched quote in command!" << endl;
+        continue;
       }
     }
 
@@ -243,33 +243,15 @@ int main()
     }
 
     // echo command
-    else if (cmd == "echo")
+    else if (cmd.substr(0, 4) == "echo")
     {
-      cout << args[0] << endl;
+      cout << cmd.substr(5) << endl;
     }
 
     // command is not found
     else
     {
-      string exe_path = doesItExist(cmd);
-      if (exe_path != " ")
-      {
-        // Build command string for system()
-        string full_cmd = "\"" + exe_path + "/" + cmd + "\"";
-        for (const auto &arg : args)
-        {
-          full_cmd += " \"" + arg + "\"";
-        }
-        int ret = system(full_cmd.c_str());
-        if (ret == -1)
-        {
-          cout << cmd << ": failed to execute" << endl;
-        }
-      }
-      else
-      {
-        cout << cmd << ": command not found" << endl;
-      }
+      cout << cmd << ": command not found" << endl;
     }
   }
 }
